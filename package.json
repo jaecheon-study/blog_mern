@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/jaecheon-study/blog_mern/issues"
   },
-  "homepage": "https://github.com/jaecheon-study/blog_mern#readme"
+  "homepage": "https://github.com/jaecheon-study/blog_mern#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
