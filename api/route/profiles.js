@@ -137,4 +137,82 @@ router.post('/register', checkAuth, (req, res) => {
         });
 });
 
+/**
+ * 유저 정보는 해당 유저만 변경해야 한다.
+ * @route   PATCH /profiles
+ * @desc    Modify user profile
+ * @access  Private
+ */
+router.patch('/', checkAuth, (req, res) => {
+
+    let errors = {};
+    // Get fields
+    const profileFields = {};
+    // 로그인 유저 아이디 할당
+    profileFields.user = req.user.id;
+    
+    // 해당 필드 값 할당.
+    if (req.body.handle) profileFields.handle = req.body.handle;
+    if (req.body.company) profileFields.company = req.body.company;
+    if (req.body.website) profileFields.website = req.body.website;
+    if (req.body.location) profileFields.location = req.body.location;
+    if (req.body.bio) profileFields.bio = req.body.bio;
+    if (req.body.status) profileFields.status = req.body.status;
+    if (req.body.githubusername) profileFields.githubusername = req.body.githubusername;
+
+    // Skills - Spilt into array
+    if (typeof profileFields.skills !== 'undefined') {
+        profileFields.skills = req.body.skills.split(',');
+    }
+
+    // Social
+    profileFields.social = {};
+
+    // 유저 아이디로 프로필 찾음
+    profileModel
+        .findOne({user: req.user.id})
+        .exec()
+        .then(profile => {
+            // 유저의 프로필이 없으면
+            if (!profile) {
+                errors.noprofile = 'Not Found user profile';
+                return res.status(404).json({
+                    errors: errors
+                });
+            } else {
+                // profile update
+                profileModel
+                    .findOneAndUpdate(
+                        {user: req.user.id}, // 유저의 아이디로 찾음
+                        {$set: profileFields}, // 변경 될 내용들
+                        {new: true} // findOneAndUpdate에서 필히 사용해야한다. 변경 된 내용으로 보여주는 옵션
+                    )
+                    .exec()
+                    .then(profile => {
+                        if (!profile) {
+                            errors.cannotupdate = 'can not update user profile';
+                            return res.status(404).json({
+                                errors: errors
+                            });
+                        } else {
+                            res.status(200).json({
+                                msg: 'Successful modify user profile',
+                                userProfile: profile
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        res.status(500).json({
+                            error: err
+                        });
+                    });
+            }
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
+            });
+        });
+});
+
 module.exports = router;

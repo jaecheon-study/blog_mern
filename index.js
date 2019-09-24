@@ -22,7 +22,7 @@ const postsRouter = require('./api/route/posts');
 const profilesRouter = require('./api/route/profiles');
 const usersRouter = require('./api/route/users');
 
-mongoose.connect(process.env.MONGO_URL, {dbName: 'blog_mern', useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true})
+mongoose.connect(process.env.MONGO_URL, {dbName: 'blog_mern', useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true, useFindAndModify: false})
     .then(() => console.log(`MongoDb Connect...`))
     .catch(err => console.log(`error: ${err}`));
 
