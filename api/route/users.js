@@ -7,6 +7,10 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const userModel = require('../../models/User');
 const passport = require('passport');
+// 유저 로그인 유효 값 검사를 위한 validator
+const validateRegisterInput = require('validator');
+const checkAuth = passport.authenticate('jwt', {session: false});
+ 
 
 /**
  * @route   GET /users/test
@@ -26,6 +30,19 @@ router.get('/test', (req, res) => {
  */
 router.post('/register', (req, res) => {
 
+    /**
+     * 유효 값 확인 req.body -> 사용자 입력 값
+     * const {errors, isValid} 는 해당 값이 error이면 errors를 아니면 isValid의 반환 값을 같는다.
+     */
+    const {errors, isValid} = validateRegisterInput(req.body);
+    
+    // check validation
+    if (isValid) {
+        return res.status(404).json({
+            errors: errors
+        }); 
+    }
+
     userModel
         // email 유무 체크, findOne은 컬렉션 항목에서 하나만 찾는다.
         .findOne({email: req.body.email})
@@ -33,9 +50,8 @@ router.post('/register', (req, res) => {
         .then(result => {
             // email이 있을 경우. 즉 기존 회원 가입이 되어있는경우
             if (result) {
-                return res.status(404).json({
-                    msg: 'Email is already exists'
-                });
+                errors.email = 'Email is already exists';
+                return res.status(404).json(errors);
             } else {
                 // 이미지 자동 생성 (avatar 자동 생성) 이메일 주소 기준
                 const avatar = gravatar.url(req.body.email, {
@@ -156,7 +172,7 @@ router.post('/signin', (req, res) => {
  * @desc    Return current user
  * @access  Private
  */
-router.get('/current', passport.authenticate('jwt', {session: false}), (req, res) => { // passport로 인증
+router.get('/current', checkAuth, (req, res) => { // passport로 인증
     /**
      * config/passport.js에서 
      * return done(null, user); 성공시 받은 user의 데이터안에 것을 불러온다.
