@@ -76,4 +76,60 @@ router.post('/register', (req, res) => {
         });
 });
 
+/**
+ * @route   POST /users/signin
+ * @desc    User Login (sign in)
+ * @access  Public
+ */
+router.post('/signin', (req, res) => {
+
+    // email, password
+    const email = req.body.email;
+    const password = req.body.password;
+
+    // 등록된 유저 찾기
+    userModel
+        .findOne({email})
+        .exec()
+        .then(user => {
+            // 등록된 유저가 없는 경우
+            if (!user) {
+                return res.status(404).json({
+                    msg: 'Not found user email',
+                    request: {
+                        type: 'POST',
+                        url: 'http://localhost:5000/users/register'
+                    }
+                });
+            } else {
+                console.log(user);
+                // bcrypt로 암호화 된 비밀번호가 맞는지 비교
+                bcrypt.compare(password, user.password)
+                    .then(isMatch => {
+                        // 암호가 맞지 않다면
+                        if (!isMatch) {
+                            return res.status(404).json({
+                                msg: 'Password incorrect (not match)'
+                            });
+                        } else {
+                            res.status(200).json({
+                                msg: 'Successful password is match'
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        res.status(500).json({
+                            error: err
+                        });
+                    });
+            }
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
+            });
+        });
+
+});
+
 module.exports = router;
