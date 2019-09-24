@@ -5,6 +5,8 @@ const router = express.Router();
 const profileModel = require('../../models/Profile');
 const passport = require('passport');
 const checkAuth = passport.authenticate('jwt', {session: false});
+// validate 모듈 추가
+const validateProfileInput = require('../../validation/profile');
 
 /**
  * @route   GET /profiles/test
@@ -29,6 +31,7 @@ router.get('/myinfo', checkAuth, (req, res) => {
 
     profileModel
         .findOne({user: id}) // profile Schema의 user collection id
+        .populate('user', ['name', 'avatar']) // user에 대한 name과 avatar정보도 보여줌
         .exec()
         .then(profile => {
             if (!profile) {
@@ -57,9 +60,17 @@ router.get('/myinfo', checkAuth, (req, res) => {
  */
 router.post('/register', checkAuth, (req, res) => {
 
+    const {errors, isValid} = validateProfileInput(req.body);
+
+    if (!isValid) {
+        return res.status(404).json({
+            error: errors
+        });
+    }
+
     // user id 할당
     const id = req.user.id;
-    let errors = {};
+   
     // Get fields
     const profileFields = {};
     profileFields.user = id;
@@ -145,7 +156,14 @@ router.post('/register', checkAuth, (req, res) => {
  */
 router.patch('/', checkAuth, (req, res) => {
 
-    let errors = {};
+    const {errors, isValid} = validateProfileInput(req.body);
+
+    if (!isValid) {
+        return res.status(404).json({
+            error: errors
+        });
+    }
+
     // Get fields
     const profileFields = {};
     // 로그인 유저 아이디 할당
