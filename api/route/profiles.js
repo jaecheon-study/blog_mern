@@ -9,14 +9,33 @@ const checkAuth = passport.authenticate('jwt', {session: false});
 const validateProfileInput = require('../../validation/profile');
 
 /**
- * @route   GET /profiles/test
- * @desc    Test profiles route
+ * @route   GET /profiles/all
+ * @desc    Get all profile list
  * @access  Public
  */
-router.get('/test', (req, res) => {
-    res.status(200).json({
-        msg: 'Success profiles test router'
-    });
+router.get('/all', (req, res) => {
+    
+    profileModel
+        .find()
+        .populate('user', ['name', 'avatar']) // user collection에서 name과 avatar 가져옴
+        .exec()
+        .then(profiles => {
+            if (!profiles) {
+                return res.status(404).json({
+                    msg: 'There is no profile info'
+                });
+            } else {
+                res.status(200).json({
+                    count: profiles.length,
+                    profileList: profiles
+                });
+            }
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
+            });
+        });
 });
 
 /**
