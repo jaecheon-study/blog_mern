@@ -14,14 +14,32 @@ const validateSignInInput = require('../../validation/login');
 const checkAuth = passport.authenticate('jwt', {session: false});
  
 /**
- * @route   GET /users/test
- * @desc    Test get route
+ * @route   GET /users/all
+ * @desc    Get user list
  * @access  Public
  */
-router.get('/test', (req, res) => {
-    res.status(200).json({
-        msg: 'Success users test router'
-    });
+router.get('/all', (req, res) => {
+    userModel
+        .find()
+        .exec()
+        .then(users => {
+            if (!users) {
+                return res.status(404).json({
+                    msg: 'Not found user list'
+                });
+            } else {
+                res.status(200).json({
+                    msg: 'Successful user list',
+                    count: users.length,
+                    usersInfo: users
+                });
+            }
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
+            });
+        });
 });
 
 /**
