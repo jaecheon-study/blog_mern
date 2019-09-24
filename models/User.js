@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const schema = mongoose.Schema;
+const Schema = mongoose.Schema;
 
 // user schema 생성
 const userSchema = new Schema({
@@ -17,8 +17,7 @@ const userSchema = new Schema({
         require: true
     },
     avatar: {
-        type: String,
-        require: true
+        type: String
     },
     date: {
         type: String,
