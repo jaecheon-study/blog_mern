@@ -6,7 +6,7 @@ const isEmpty = require('./is-empty');
 module.exports = function validateRegisterInput(data) {
     console.log(data);
     // 에러를 담을 객체
-    const errors = {};
+    let errors = {};
 
     // 사용자 입력 값 확인
     data.name = !isEmpty(data.name) ? data.name : ''; // name 입력 값이 없으면 공백

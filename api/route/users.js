@@ -7,11 +7,12 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const userModel = require('../../models/User');
 const passport = require('passport');
+// 유저 생성 유효 값 검사를 위한 validator
+const validateRegisterInput = require('../../validation/register');
 // 유저 로그인 유효 값 검사를 위한 validator
-const validateRegisterInput = require('validator');
+const validateSignInInput = require('../../validation/login');
 const checkAuth = passport.authenticate('jwt', {session: false});
  
-
 /**
  * @route   GET /users/test
  * @desc    Test get route
@@ -101,6 +102,13 @@ router.post('/register', (req, res) => {
  */
 router.post('/signin', (req, res) => {
 
+    const {errors, isValid} = validateSignInInput(req.body);
+
+    // check validation
+    if (!isValid) {
+        return res.status(404).json(errors);
+    }
+
     // email, password
     const email = req.body.email;
     const password = req.body.password;
@@ -112,8 +120,9 @@ router.post('/signin', (req, res) => {
         .then(user => {
             // 등록된 유저가 없는 경우
             if (!user) {
+                errors.email = 'User not found';
                 return res.status(404).json({
-                    msg: 'Not found user email',
+                    errors: errors,
                     request: {
                         type: 'POST',
                         url: 'http://localhost:5000/users/register'
@@ -125,8 +134,9 @@ router.post('/signin', (req, res) => {
                     .then(isMatch => {
                         // 암호가 맞지 않다면
                         if (!isMatch) {
+                            errors.password = 'Password incorrect (not matched)';
                             return res.status(404).json({
-                                msg: 'Password incorrect (not match)'
+                                errors: errors
                             });
                         } else {
                             // user matched payload: 유효 탑재량
