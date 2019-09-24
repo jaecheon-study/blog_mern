@@ -4,6 +4,7 @@ const router = express.Router();
 // user avatar 설정을 위한 할당. (프로필 이미지)
 const gravatar = require('gravatar');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const userModel = require('../../models/User');
 
 /**
@@ -102,7 +103,6 @@ router.post('/signin', (req, res) => {
                     }
                 });
             } else {
-                console.log(user);
                 // bcrypt로 암호화 된 비밀번호가 맞는지 비교
                 bcrypt.compare(password, user.password)
                     .then(isMatch => {
@@ -112,9 +112,27 @@ router.post('/signin', (req, res) => {
                                 msg: 'Password incorrect (not match)'
                             });
                         } else {
-                            res.status(200).json({
-                                msg: 'Successful password is match'
-                            });
+                            // user matched payload: 유효 탑재량
+                            const payload = {
+                                id: user.id,
+                                name: user.name,
+                                avatar: user.avatar
+                            };
+
+                            // sign token
+                            jwt.sign(
+                                payload,
+                                process.env.SECRET,
+                                {expiresIn: '1h'},
+                                (err, token) => {
+                                    if (err) throw err;
+                                    res.status(200).json({
+                                        success: true,
+                                        token: 'Bearer ' + token
+                                    });
+                                }
+                            );
+
                         }
                     })
                     .catch(err => {
