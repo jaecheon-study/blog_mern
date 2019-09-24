@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const profileSchema = new Schema({
-    _id: Schema.Types.ObjectId,
     user: { // 유저
         // 유저의 아이디를 가져온다.
         type: Schema.Types.ObjectId,
