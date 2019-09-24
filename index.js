@@ -14,6 +14,8 @@ const mongoose = require('mongoose');
 
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+// passport 할당
+const passport = require('passport');
 
 // 라우터 설정
 const postsRouter = require('./api/route/posts');
@@ -23,6 +25,11 @@ const usersRouter = require('./api/route/users');
 mongoose.connect(process.env.MONGO_URL, {dbName: 'blog_mern', useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true})
     .then(() => console.log(`MongoDb Connect...`))
     .catch(err => console.log(`error: ${err}`));
+
+// passport middleware
+app.use(passport.initialize());
+// passport config
+require('./config/passport')(passport)
 
 // morgan 설정
 app.use(morgan('dev'));

@@ -6,6 +6,7 @@ const gravatar = require('gravatar');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const userModel = require('../../models/User');
+const passport = require('passport');
 
 /**
  * @route   GET /users/test
@@ -148,6 +149,23 @@ router.post('/signin', (req, res) => {
             });
         });
 
+});
+
+/**
+ * @route   GET /users/current
+ * @desc    Return current user
+ * @access  Private
+ */
+router.get('/current', passport.authenticate('jwt', {session: false}), (req, res) => { // passport로 인증
+    /**
+     * config/passport.js에서 
+     * return done(null, user); 성공시 받은 user의 데이터안에 것을 불러온다.
+     */
+    res.json({
+        id: req.user.id,
+        name: req.user.name,
+        email: req.user.email,
+    });
 });
 
 module.exports = router;
