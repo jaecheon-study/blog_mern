@@ -277,6 +277,73 @@ router.post('/education/register', checkAuth, (req, res) => {
                 error: err
             });
         });
+});
+
+/**
+ * @route   POST /profile/experience/register
+ * @desc    Register experience to profile
+ * @access  Private
+ */
+router.post('/experience/register', checkAuth, (req, res) => {
+
+    const {errors, isValid} = validateExperienceInput(req.body);
+
+    // check validation
+    if (!isValid) {
+        return res.status(500).json({
+            errors: errors
+        });
+    }
+
+    profileModel
+        .findOne({user: req.user.id})
+        .exec()
+        .then(profile => {
+            // 유저 프로필이 없을 때
+            if (!profile) {
+                return res.status(404).json({
+                    msg: 'Not found user profile'
+                });
+            } else {
+                const newExp = {
+                    title: req.body.title,
+                    company: req.body.company,
+                    location: req.body.location,
+                    from: req.body.from,
+                    to: req.body.to,
+                    current: req.body.current,
+                    description: req.body.description
+                };
+
+                profile.experience.unshift(newExp);
+
+                profile
+                    .save()
+                    .then(profile => {
+                        if (!profile) {
+                            return res.status(404).json({
+                                msg: 'Not found user profile'
+                            });
+                        } else {
+                            res.status(200).json({
+                                msg: 'Successful register profile experience',
+                                experience: profile.experience,
+                                profileInfo: profile
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        res.status(500).json({
+                            error: err
+                        });
+                    });
+            }
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
+            });
+        });
 
 });
 
