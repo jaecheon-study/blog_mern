@@ -2,6 +2,12 @@
 const express = require('express');
 const router = express.Router();
 
+const mongoose = require('mongoose');
+const passport = require('passport');
+const authCheck = passport.authenticate('jwt', {session: false});
+
+const postModel = require('../../models/Post');
+
 /**
  * @route   GET /posts/test
  * @desc    Test posts route
