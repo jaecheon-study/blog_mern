@@ -95,7 +95,11 @@ router.get('/myinfo', checkAuth, (req, res) => {
                 });
             } else {
                 res.status(200).json({
-                    profile: profile
+                    profile: profile,
+                    request: {
+                        type: 'GET',
+                        url: 'http://localhost:5000/profiles/all'
+                    }
                 });
             }
         })
@@ -269,7 +273,11 @@ router.patch('/', checkAuth, (req, res) => {
                         } else {
                             res.status(200).json({
                                 msg: 'Successful modify user profile',
-                                userProfile: profile
+                                userProfile: profile,
+                                request: {
+                                    type: "GET",
+                                    url: 'http://localhost:5000/users/all'
+                                }
                             });
                         }
                     })
