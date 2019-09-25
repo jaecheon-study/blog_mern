@@ -39,6 +39,41 @@ router.get('/all', (req, res) => {
 });
 
 /**
+ * 다른 유저의 정보
+ * @route   GET /profiles/user/:userId
+ * @desc    Get profile by userId
+ * @access  Private
+ */
+router.get('/user/:userId', checkAuth, (req, res) => {
+
+    const errors = {};
+    const userId = req.params.userId;
+
+    profileModel
+        .findOne({user: userId})
+        .populate('user', ['name', 'avatar'])
+        .exec()
+        .then(profile => {
+            // 유저에 대한 프로필이 없을 때 (못찾을 때)
+            if (!profile) {
+                errors.noProfile = 'Not found user profile';
+                return res.status(404).json({
+                    error: errors
+                });
+            } else {
+                res.status(200).json({
+                    userProfile: profile
+                });
+            }
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
+            });
+        });
+});
+
+/**
  * @route   GET /profiles/myinfo
  * @desc    Get users current profile
  * @access  Private
