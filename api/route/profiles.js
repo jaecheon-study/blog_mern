@@ -474,4 +474,107 @@ router.delete('/:profileId', checkAuth, (req, res) => {
         });
 });
 
+/**
+ * @route   DELETE /profiles/experience/:expId
+ * @desc    Remove experience to profile
+ * @access  Private
+ */
+router.delete('/experience/:expId', checkAuth, (req, res) => {
+
+    const userId = req.user.id;
+
+    profileModel
+        .findOne({user: userId})
+        .exec()
+        .then(profile => {
+            // 삭제할 인덱스 할당
+            const removeIndex = profile.experience
+                .map(item => item._id)
+                .indexOf(req.params.exp_id);
+
+            // splice out of array
+            profile.experience.splice(removeIndex, 1);
+
+            // save
+            profile
+                .save()
+                .then(profile => {
+                    if (!profile) {
+                        return res.status(404).json({
+                            msg: 'Not found user profile'
+                        });
+                    } else {
+                        res.status(200).json({
+                            msg: 'Successful remove experience to profile',
+                            request: {
+                                type: 'GET',
+                                url: 'http://localhost:5000/profiles/all'
+                            }
+                        });
+                    }
+                })
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
+            });
+        });
+});
+
+/**
+ * @route   DELETE /profiles/education/:eduId
+ * @desc    Remove education to profile
+ * @access  Private
+ */
+router.delete('/education/:eduId', checkAuth, (req, res) => {
+    
+    const userId = req.user.id;
+
+    profileModel
+        .findOne({user: userId})
+        .exec()
+        .then(profile => {
+            if (!profile) {
+                return res.status(404).json({
+                    msg: 'Not found user profile'
+                });
+            } else {
+                const removeIndex = profile.education
+                    .map(item => item._id)
+                    .indexOf(req.params.eduId);
+
+                profile.education.splice(removeIndex, 1);
+
+                // save
+                profile
+                    .save()
+                    .then(profile => {
+                        if (!profile) {
+                            return res.status(404).json({
+                                msg: 'Not found user profile'
+                            });
+                        } else {
+                            res.status(200).json({
+                                msg: 'Successful remove education to profile',
+                                request: {
+                                    type: 'GET',
+                                    url: 'http://localhost:5000/profiles/all'
+                                }
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        res.status(500).json({
+                            error: err
+                        });
+                    });
+            }
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
+            });
+        });
+});
+
 module.exports = router;
