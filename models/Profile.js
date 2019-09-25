@@ -7,7 +7,7 @@ const profileSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'users' // users collection 참조
     },
-    handle: { // 언어
+    handle: { // 지원분야
         type: String,
         required: true,
         max: 40
@@ -35,14 +35,81 @@ const profileSchema = new Schema({
     githubusername: { // 깃허브 이름
         type: String
     },
-    experience: [ // 경력
-
+    experience: [ // 경력 하나의 내용에 여러개의 내용들이 들어가니 배열로 선언
+        {
+            title: {
+                type: String,
+                required: true
+            },
+            company: {
+                type: String,
+                required: true
+            },
+            location: {
+                type: String
+            },
+            from: {
+                type: Date,
+                required: true
+            },
+            to: {
+                type: Date
+            },
+            current: { // 경향
+                type: Boolean,
+                default: false
+            },
+            description: { // 설명
+                type: String
+            }
+        }
     ], 
     education: [ // 학력
-
+        {
+            school: {
+                type: String,
+                required: true
+            },
+            degree: { // 학위
+                type: String,
+                required: true
+            },
+            fieldofstudy: { // 연구 분야 [전공]
+                type: String,
+                required: true
+            },
+            from: {
+                type: Date,
+                required: true
+            },
+            to: {
+                type: Date
+            },
+            current: {
+                type: Boolean,
+                default: false
+            },
+            description: {
+                type: String
+            }
+        }
     ],
     social: { // 소셜 주소
-
+        youtube: {
+            type: String
+        },
+        twitter: {
+            type: String
+        },
+        facebook: {
+            type: String
+        },
+        linkedin: {
+            type: String
+        },
+        instagram: {
+            type: String
+        }
     },
     date: { // 가입 날짜
         type: Date,
