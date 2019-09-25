@@ -7,6 +7,8 @@ const passport = require('passport');
 const checkAuth = passport.authenticate('jwt', {session: false});
 // validate 모듈 추가
 const validateProfileInput = require('../../validation/profile');
+const validateEducationInput = require('../../validation/education');
+const validateExperienceInput = require('../../validation/experience');
 
 /**
  * @route   GET /profiles/all
@@ -204,6 +206,78 @@ router.post('/register', checkAuth, (req, res) => {
                 error: err
             });
         });
+});
+
+/**
+ * @route   POST /profiles/education/register
+ * @desc    Add education to profile
+ * @access  Private
+ */
+router.post('/education/register', checkAuth, (req, res) => {
+
+    const {errors, isValid} = validateEducationInput(req.body);
+
+    // check validation
+    if (!isValid) {
+        return res.status(404).json({
+            msg: errors
+        });
+    }
+
+    profileModel
+        .findOne({user: req.user.id})
+        .exec()
+        .then(profile => {
+            // 해당 유저의 프로필이 없다면
+            if (!profile) {
+                return res.status(404).json({
+                    msg: 'Not found user profile'
+                });
+            } else {
+                // education 속성에 넣어줄 데이터
+                const newEdu = {
+                    school: req.body.school,
+                    degree: req.body.degree,
+                    fieldofstudy: req.body.fieldofstudy,
+                    from: req.body.from,
+                    to: req.body.to,
+                    current: req.body.current,
+                    description: req.body.description
+                };
+
+                // Add to exp array in profile.education
+                profile.education.unshift(newEdu);
+                
+                profile 
+                    .save()
+                    .then(profile => {
+                        // 유저의 프로필이 없다면
+                        if (!profile) {
+                            return res.status(404).json({
+                                msg: 'Not found user profile'
+                            });
+                        } else {
+                            res.status(200).json({
+                                msg: 'Successful user profile education',
+                                educationInfo: profile.education,
+                                profileInfo: profile
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        res.status(500).json({
+                            error: err
+                        });
+                    });
+
+            }
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
+            });
+        });
+
 });
 
 /**
