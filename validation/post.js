@@ -12,7 +12,7 @@ module.exports = function validatePostInput(data) {
         errors.title = 'Post title must be between 10 and 30 characters';
     }
 
-    if (!Validator.isLength(data.content), {min: 1, max:300}) {
+    if (!Validator.isLength(data.content, {min: 1, max:300})) {
         errors.content = 'Post content must be between 1 and 300 characters';
     }
 
@@ -21,7 +21,7 @@ module.exports = function validatePostInput(data) {
     }
 
     if (Validator.isEmpty(data.content)) {
-        errors.content = 'Content field is required';
+        errors.content = 'Content field is required'
     }
 
     return {
