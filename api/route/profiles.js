@@ -295,4 +295,42 @@ router.patch('/', checkAuth, (req, res) => {
         });
 });
 
+/**
+ * 프로필은 권한이 있는 사람이 삭제
+ * @route   DELETE /profiles/:profileId
+ * @desc    Remove user profile
+ * @access  Private
+ */
+router.delete('/:profileId', checkAuth, (req, res) => {
+    
+    const id = req.params.profileId;
+    const errors = {};
+
+    profileModel
+        .remove({_id: id})
+        .exec()
+        .then(result => {
+            errors.cannotremove = 'Remove user profile fail';
+            // 삭제 실패
+            if (!result) {
+                return res.status(404).json({
+                    error: errors
+                });
+            } else {
+                res.status(200).json({
+                    msg: 'Successful remove user profile',
+                    request: {
+                        type: 'GET',
+                        url: 'http://localhost:5000/profiles/all'
+                    }
+                });
+            }
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
+            });
+        });
+});
+
 module.exports = router;
