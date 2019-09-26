@@ -21,7 +21,12 @@ const postSchema = new Schema({
         type: String
     },
     likes: [
-
+        {
+            user: {
+                type: Schema.Types.ObjectId,
+                ref: 'users' // users collection 참조
+            }
+        }
     ],
     comments: [
 

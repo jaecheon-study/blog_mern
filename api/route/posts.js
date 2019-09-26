@@ -128,6 +128,73 @@ router.get('/:postId', (req, res) => {
 });
 
 /**
+ * @route   POST /posts/like/:postId
+ * @desc    Like post
+ * @access  Private
+ */
+router.post('/like/:postId', authCheck, (req, res) => {
+    
+    const postId = req.params.postId;
+    const userId = req.user.id;
+
+    // 어떤 유저가 like를 눌렀는지
+    profileModel
+        .findOne({user: userId})
+        .exec()
+        .then(profile => {
+            if (!profile) {
+                return res.status(404).json({
+                    msg: 'Not Found user'
+                });
+            } else {
+                postModel
+                    .findById(postId)
+                    .exec()
+                    .then(post => {
+                        if (!post) {
+                            return res.status(404).json({
+                                msg: 'Not found post item'
+                            });
+                        } else {
+                            // 한 개의 게시물에 한번만 누름
+                            if (post.likes.filter(like => like.user.toString() === req.user.id).length > 0) {
+                                return res.status(403).json({
+                                    msg: 'User already liked this post'
+                                });
+                            } else {
+                                // Add user id to likes array
+                                post.likes.unshift({user: userId});
+                                post
+                                    .save()
+                                    .then(post => {
+                                        res.status(200).json({
+                                            msg: 'Successful like this post',
+                                            postInfo: post
+                                        });
+                                    })
+                                    .catch(err => {
+                                        res.status(502).json({
+                                            error: err
+                                        });
+                                    });
+                            }
+                        }
+                    })
+                    .catch(err => {
+                        res.status(501).json({
+                            error: err
+                        });
+                    });
+            }
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
+            });
+        });
+});
+
+/**
  * @route   DELETE /posts/:postId
  * @desc    Remove post item
  * @access  Private
