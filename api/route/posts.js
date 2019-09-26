@@ -272,6 +272,74 @@ router.post('/unlike/:postId', authCheck, (req, res) => {
 });
 
 /**
+ * @route   POST /posts/comment/:postId
+ * @desc    Add comment to post
+ * @access  Private
+ */
+router.post('/comment/:postId', authCheck, (req, res) => {
+    
+    const postId = req.params.postId;
+    const userId = req.user.id;
+
+    const {errors, isValid} = validatePostInput(req.body);
+    // check validation
+    if (!isValid) {
+        return res.status(400).json({
+            error: errors
+        });
+    } else {
+        postModel
+            .findById(postId)
+            .exec()
+            .then(post => {
+                if (!post) {
+                    return res.status(404).json({
+                        msg: 'Not found post'
+                    });
+                } else {
+                    const newComment = {
+                        text: req.body.text,
+                        name: req.body.name,
+                        avatar: req.body.avatar,
+                        user: userId
+                    };
+
+                    // add to comments array
+                    post.comments.unshift(newComment);
+
+                    // save
+                    post
+                        .save()
+                        .then(post => {
+                            if (!post) {
+                                return res.status(404).json({
+                                    msg: 'Not found post'
+                                });
+                            } else {
+                                res.status(200).json({
+                                    msg: 'Successful comment to post',
+                                    comments: post.comments,
+                                    postInfo: post
+                                });
+                            }
+                        })
+                        .catch(err => {
+                            res.status(501).json({
+                                error: err
+                            });
+                        });
+
+                }
+            })
+            .catch(err => {
+                res.status(500).json({
+                    error: err
+                });
+            });
+    }
+});
+
+/**
  * @route   DELETE /posts/:postId
  * @desc    Remove post item
  * @access  Private
