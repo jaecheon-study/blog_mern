@@ -394,4 +394,62 @@ router.delete('/:postId', authCheck, (req, res) => {
         });
 });
 
+/**
+ * 게시글 아이디와 댓글 아이디가 필요하다.
+ * 해당 게시글의 댓글을 삭제 해야 하기 때문
+ * @route   DELETE /posts/comment/:postId/:commentId
+ * @desc    Remove comment
+ * @access  Private
+ */
+router.delete('/comment/:postId/:commentId', authCheck, (req, res) => {
+
+    const postId = req.params.postId;
+    const commentId = req.params.commentId;
+
+    postModel
+        .findById(postId)
+        .exec()
+        .then(post => {
+            // 해당 게시글에 댓글이 없다면
+            if (post.comments.filter(comment => comment._id.toString() === commentId).length === 0) {
+                return  res.status(404).json({
+                    msg: 'Comment does not exist'
+                });
+            } else {
+                // 삭제할 인덱스
+                const removeIndex = post.comments.map(item => item._id.toString()).indexOf(commentId);
+                
+                post.comments.splice(removeIndex, 1);
+                post
+                    .save()
+                    .then(post => {
+                        if (!post) {
+                            return res.status(404).json({
+                                msg: 'Not found post'
+                            });
+                        } else {
+                            res.status(200).json({
+                                msg: 'Successful remove comment',
+                                postInfo: post,
+                                request: {
+                                    type: 'GET',
+                                    url: 'http://localhost:5000/posts/' + postId
+                                }
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        res.status(500).json({
+                            error: err
+                        });
+                    });
+            }
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
+            });
+        });
+});
+
 module.exports = router;
