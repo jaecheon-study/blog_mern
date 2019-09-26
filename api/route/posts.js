@@ -17,6 +17,7 @@ const validatePostInput = require('../../validation/post');
 router.get('/all', (req, res) => {
     postModel
         .find()
+        .populate('user', ['name', 'avatar'])
         .exec()
         .then(posts => {
             if (!posts) {
@@ -84,6 +85,39 @@ router.post('/register', authCheck, (req, res) => {
                 error: err
             });
         });
+});
+
+/**
+ * @route   GET posts/:postId
+ * @desc    Get post item
+ * @access  Public
+ */
+router.get('/:postId', (req, res) => {
+
+    // postId 할당
+    const id = req.params.postId;
+    
+    postModel
+        .findById(id)
+        .exec()
+        .then(post => {
+            if (!post) {
+                return res.status(404).json({
+                    msg: 'Not found post'
+                });
+            } else {
+                res.status(200).json({
+                    msg: 'Successful post item',
+                    postItem: post
+                });
+            }
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
+            });
+        });
+
 });
 
 module.exports = router;
