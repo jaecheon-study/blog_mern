@@ -195,6 +195,83 @@ router.post('/like/:postId', authCheck, (req, res) => {
 });
 
 /**
+ * @route   POST /posts/unlike/:postId
+ * @desc    Unlike post
+ * @access  Private
+ */
+router.post('/unlike/:postId', authCheck, (req, res) => {
+
+    const userId = req.user.id;
+    const postId = req.params.postId;
+
+    // 유저가 해당 게시글에 좋아요를 눌렀는지 확인
+    profileModel
+        .findOne({user: userId})
+        .exec()
+        .then(profile => {
+            if (!profile) {
+                return res.status(404).json({
+                    msg: 'Not found user'
+                });
+            } else {
+
+                postModel
+                    .findById(postId)
+                    .exec()
+                    .then(post => {
+                        if (!post) {
+                            return res.status(404).json({
+                                msg: 'Not found post'
+                            });
+                        } else {
+                            if (post.likes.filter(like => like.user.toString() === userId).length === 0) {
+                                return res.status(400).json({
+                                    notliked: 'You have not liked this post'
+                                });
+                            }
+
+                            // Get remove index
+                            const removeIndex = post.likes.map(item => item.user.toString()).indexOf(userId);
+
+                            // splice out of array
+                            post.likes.splice(removeIndex, 1);
+
+                            // save
+                            post
+                                .save()
+                                .then(post => {
+                                    if (!post) {
+                                        return res.status(404).json({
+                                            msg: 'Not found post'
+                                        });
+                                    } else {
+                                        res.status(200).json({
+                                            msg: 'Successful unlike this post'
+                                        });
+                                    }
+                                })
+                                .catch(err => {
+                                    res.status(501).json({
+                                        error: err
+                                    });
+                                });
+                        }
+                    })
+                    .catch(err => {
+                        res.status(501).json({
+                            error: err
+                        });
+                    });
+            }
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
+            });
+        });
+});
+
+/**
  * @route   DELETE /posts/:postId
  * @desc    Remove post item
  * @access  Private
