@@ -12,14 +12,14 @@ opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 opts.secretOrKey = process.env.SECRET;
 
 module.exports = (passport) => {
-    console.log(passport);
+    // console.log(passport);
     passport.use(
         new jwtStrategy(opts, (jwt_payload, done) => {
             userModel
                 .findById(jwt_payload.id)
                 .exec()
                 .then(user => {
-                    console.log(user);
+                    // console.log(user);
                     // 유저가 없다면
                     if (!user) {
                         // db 접근 시 발생하는 서버 에러, 성공 했을 시 return 값, 3번째 아규먼트는 msg를 넣을 수 있다 {msg: 'ex'}}
